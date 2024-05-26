@@ -3,9 +3,14 @@
     <Header />
     <div class="main-container">
       <Sidebar />
-      <main class="content">
-        <router-view />
-      </main>
+      <div class="content-container">
+        <div class="foryou-following-container">
+          <ForyouFollowing></ForyouFollowing>
+        </div>
+        <main class="content">
+          <router-view />
+        </main>
+      </div>
     </div>
     <Footer />
   </div>
@@ -15,8 +20,7 @@
 import Header from './components/HeaderView.vue'
 import Sidebar from './components/SidebarView.vue'
 import Footer from './components/FooterView.vue'
-
-
+import ForyouFollowing from './components/ForyouFollowingView.vue'
 </script>
 
 <style>
@@ -29,6 +33,16 @@ import Footer from './components/FooterView.vue'
 .main-container {
   display: flex;
   flex: 1;
+}
+
+.content-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.foryou-following-container {
+  align-self: flex-start;
 }
 
 .content {
@@ -44,6 +58,7 @@ footer {
   padding: 10px;
   text-align: center;
 }
+
 *,
 *::before,
 *::after {
@@ -52,12 +67,10 @@ footer {
   box-sizing: border-box;
 }
 
-
 body {
   margin: 0;
   padding: 0;
 }
-
 
 html,
 body {
