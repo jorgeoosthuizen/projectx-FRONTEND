@@ -1,30 +1,67 @@
 <template>
-  <nav>
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-  </nav>
-  <router-view/>
+  <div id="app">
+    <Header />
+    <div class="main-container">
+      <Sidebar />
+      <main class="content">
+        <router-view />
+      </main>
+    </div>
+    <Footer />
+  </div>
 </template>
+
+<script setup>
+import Header from './components/HeaderView.vue'
+import Sidebar from './components/SidebarView.vue'
+import Footer from './components/FooterView.vue'
+
+
+</script>
 
 <style>
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.main-container {
+  display: flex;
+  flex: 1;
+}
+
+.content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+header,
+footer {
+  background-color: #1DA1F2;
+  color: white;
+  padding: 10px;
   text-align: center;
-  color: #2c3e50;
+}
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-nav {
-  padding: 30px;
+
+body {
+  margin: 0;
+  padding: 0;
 }
 
-nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
 
-nav a.router-link-exact-active {
-  color: #42b983;
+html,
+body {
+  width: 100%;
+  height: 100%;
 }
 </style>
