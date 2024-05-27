@@ -11,11 +11,11 @@
   import { ref } from 'vue';
   
   const tweet = ref('');
-  const profileImage = ref('path/to/profile/image.jpg'); // Replace with actual path
+  const profileImage = ref('path/to/profile/image.jpg'); 
   const tweetImage = ref(null);
   
   const postTweet = () => {
-    console.log(tweet.value, tweetImage.value); // Replace this with your tweet posting logic
+    console.log(tweet.value, tweetImage.value);
     tweet.value = '';
     tweetImage.value = null;
   };
