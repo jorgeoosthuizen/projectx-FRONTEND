@@ -5,14 +5,14 @@ import { onAuthStateChanged } from "firebase/auth";
 import LoginPage from "../views/LoginView.vue";
 import RegisterPage from "../views/RegisterView.vue";
 import Dashboard from "../views/DashboardView.vue";
-import TweetView from "../views/TweetView.vue";
 import Profile from "../views/ProfileView.vue";
+import Home from "../views/HomeView.vue";
 
 const routes = [
   {
     path: "/home",
     name: "Home",
-    component: TweetView
+    component: Home
   },
   {
     path: "/register",
@@ -27,12 +27,14 @@ const routes = [
   {
     path: "/dashboard",
     name: "Dashboard",
-    component: Dashboard
+    component: Dashboard,
+    meta: { requiresAuth: true }
   },
   {
     path: "/profile",
     name: "Profile",
-    component: Profile
+    component: Profile,
+    meta: { requiresAuth: true }
   }
 ];
 
@@ -49,7 +51,7 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth && !isAuthenticated) {
-    next({ name: "/login" }); 
+    next({ name: "LoginPage" }); 
   } else {
     next();
   }
