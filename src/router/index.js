@@ -4,45 +4,30 @@ import { onAuthStateChanged } from "firebase/auth";
 
 import LoginPage from "../views/LoginView.vue";
 import RegisterPage from "../views/RegisterView.vue";
-import DashboardPage from "../views/DashboardView.vue";
 import ProfilePage from "../views/ProfileView.vue";
 import TweetView from "../views/TweetView.vue";
 
 const routes = [
   {
-    path: "/tweets",
-    name: "tweets",
-    component: TweetView,
-    meta: { requiresAuth: true },
+    path: "/home",
+    name: "Home",
+    component: TweetView
   },
   {
     path: "/register",
     name: "RegisterPage",
-    component: RegisterPage,
+    component: RegisterPage
   },
   {
     path: "/login",
     name: "LoginPage",
-    component: LoginPage,
-  },
-  {
-    path: "/dashboard",
-    name: "DashboardPage",
-    component: DashboardPage,
-    meta: { requiresAuth: true },
+    component: LoginPage
   },
   {
     path: "/profile",
     name: "ProfilePage",
-    component: ProfilePage,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: "/tweets",
-    name: "Tweets",
-    component: TweetView,
-    meta: { requiresAuth: true },
-  },
+    component: ProfilePage
+  }
 ];
 
 let isAuthenticated = false;
@@ -58,7 +43,7 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth && !isAuthenticated) {
-    next({ name: "/" }); // Redirect to LoginPage if not authenticated
+    next({ name: "/login" }); 
   } else {
     next();
   }

@@ -1,5 +1,4 @@
 <template>
-  <layout-div>
     <div class="row justify-content-md-center mt-5">
       <div class="col-4">
         <div class="card">
@@ -70,7 +69,6 @@
         </div>
       </div>
     </div>
-  </layout-div>
 </template>
 
 <script setup>
@@ -81,7 +79,8 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { setDoc, doc } from "firebase/firestore";
 
 const router = useRouter();
-const name = ref("");
+const firstName = ref(""); // Added this line
+const lastName = ref(""); // Added this line
 const email = ref("");
 const password = ref("");
 const confirmPassword = ref("");
@@ -107,7 +106,8 @@ const registerAction = async () => {
 
     // Store additional user info in Firestore
     await setDoc(doc(db, "users", user.uid), {
-      name: name.value,
+      firstName: firstName.value, // Changed this line
+      lastName: lastName.value, // Changed this line
       email: email.value,
     });
 
@@ -121,6 +121,7 @@ const registerAction = async () => {
 </script>
 
 <style scoped>
+
 .register-form {
   display: flex;
   flex-direction: column;
