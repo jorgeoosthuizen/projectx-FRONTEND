@@ -6,6 +6,7 @@
       <div class="content-container">
         <div class="foryou-following-container">
           <ForyouFollowing></ForyouFollowing>
+          <TweetView/>
         </div>
         <main class="content">
           <router-view />
@@ -21,6 +22,7 @@ import Header from './components/HeaderView.vue'
 import Sidebar from './components/SidebarView.vue'
 import Footer from './components/FooterView.vue'
 import ForyouFollowing from './components/ForyouFollowingView.vue'
+import TweetView from './views/TweetView.vue'
 </script>
 
 <style>
