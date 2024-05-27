@@ -10,6 +10,9 @@
                     <li>
                         <router-link to="/profile" class="nav-link px-0 align-middle">Profile </router-link>
                     </li>
+                    <li>
+                        <router-link to="/dashboard" class="nav-link px-0 align-middle">Dashboard </router-link>
+                    </li>
                 </ul>
                 <hr>
             </div>

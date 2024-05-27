@@ -4,8 +4,9 @@ import { onAuthStateChanged } from "firebase/auth";
 
 import LoginPage from "../views/LoginView.vue";
 import RegisterPage from "../views/RegisterView.vue";
-import ProfilePage from "../views/ProfileView.vue";
+import Dashboard from "../views/DashboardView.vue";
 import TweetView from "../views/TweetView.vue";
+import Profile from "../views/ProfileView.vue";
 
 const routes = [
   {
@@ -24,9 +25,14 @@ const routes = [
     component: LoginPage
   },
   {
+    path: "/dashboard",
+    name: "Dashboard",
+    component: Dashboard
+  },
+  {
     path: "/profile",
-    name: "ProfilePage",
-    component: ProfilePage
+    name: "Profile",
+    component: Profile
   }
 ];
 
