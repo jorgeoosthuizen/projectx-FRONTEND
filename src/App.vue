@@ -4,14 +4,11 @@
     <div class="main-container">
       <Sidebar />
       <div class="content-container">
-        <div class="foryou-following-container">
-          <ForyouFollowing></ForyouFollowing>
-          <TweetView/>
-        </div>
         <main class="content">
           <router-view />
         </main>
       </div>
+      <SidebarRight/>
     </div>
     <Footer />
   </div>
@@ -21,8 +18,7 @@
 import Header from './components/HeaderView.vue'
 import Sidebar from './components/SidebarView.vue'
 import Footer from './components/FooterView.vue'
-import ForyouFollowing from './components/ForyouFollowingView.vue'
-import TweetView from './views/TweetView.vue'
+import SidebarRight from './components/SidebarRightView.vue'
 </script>
 
 <style>
@@ -34,13 +30,18 @@ import TweetView from './views/TweetView.vue'
 
 .main-container {
   display: flex;
+  justify-content: space-between;
   flex: 1;
 }
-
 .content-container {
   display: flex;
+  justify-content:center;
+  align-items: center;
   flex-direction: column;
   flex: 1;
+  padding: 20px;
+  width: 100%; /* Add this */
+  height: 100%; /* Add this */
 }
 
 .foryou-following-container {
@@ -51,8 +52,9 @@ import TweetView from './views/TweetView.vue'
   flex: 1;
   padding: 20px;
   overflow-y: auto;
+  width: 100%; /* Add this */
+  height: 100%; /* Add this */
 }
-
 header,
 footer {
   background-color: #1DA1F2;
