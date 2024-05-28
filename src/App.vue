@@ -44,10 +44,6 @@ import SidebarRight from './components/SidebarRightView.vue'
   height: 100%; /* Add this */
 }
 
-.foryou-following-container {
-  align-self: flex-start;
-}
-
 .content {
   flex: 1;
   padding: 20px;
