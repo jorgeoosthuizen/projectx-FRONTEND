@@ -79,8 +79,8 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { setDoc, doc } from "firebase/firestore";
 
 const router = useRouter();
-const firstName = ref(""); // Added this line
-const lastName = ref(""); // Added this line
+const firstName = ref(""); 
+const lastName = ref(""); 
 const email = ref("");
 const password = ref("");
 const confirmPassword = ref("");
@@ -111,8 +111,7 @@ const registerAction = async () => {
       email: email.value,
     });
 
-    // Redirect to the login page after registration
-    router.push("/login");
+    router.push("/dashboard");
   } catch (error) {
     isSubmitting.value = false;
     validationErrors.value = { error: error.message };
