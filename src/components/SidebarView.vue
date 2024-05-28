@@ -35,6 +35,14 @@
                 </div>
               </router-link>
             </li>
+            <li class="w-100 mb-3">
+              <router-link to="/admin"
+                class="nav-link px-0 align-middle text-center btn btn-lg btn-block btn-outline-light">
+                <div style="display: flex; align-items: center; gap:10px;">
+                  <span>Admin Panel</span>
+                </div>
+              </router-link>
+            </li>
           </ul>
           <hr>
         </div>

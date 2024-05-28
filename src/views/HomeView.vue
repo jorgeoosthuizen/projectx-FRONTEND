@@ -75,7 +75,7 @@ export default {
     };
     const fetchNews = async () => {
       const apiKey = '3e3ba585f86a421c89a727d58f2b037a';
-      const url = `https://newsapi.org/v2/top-headlines?country=br&apiKey=${apiKey}`;
+      const url = `https://newsapi.org/v2/top-headlines?country=pt&apiKey=${apiKey}`;
 
       try {
         const response = await axios.get(url);

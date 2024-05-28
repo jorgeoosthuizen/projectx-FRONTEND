@@ -8,6 +8,7 @@ import RegisterPage from "../views/RegisterView.vue";
 import Dashboard from "../views/DashboardView.vue";
 import Profile from "../views/ProfileView.vue";
 import Home from "../views/HomeView.vue";
+import AdminPanel from "../views/AdminView.vue";
 
 const routes = [
   {
@@ -35,6 +36,12 @@ const routes = [
     path: "/profile",
     name: "Profile",
     component: Profile,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: "/admin",
+    name: "Admin Panel",
+    component: AdminPanel,
     meta: { requiresAuth: true }
   },
   {
