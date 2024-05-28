@@ -83,7 +83,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { db, auth } from "../firebase/firebase";
-import { collection, getDocs, addDoc, serverTimestamp, query, orderBy, doc, updateDoc, deleteDoc, getDoc, setDoc, where } from "firebase/firestore";
+import { collection, getDocs, addDoc, serverTimestamp, query, orderBy, doc, updateDoc, deleteDoc, getDoc, setDoc, where} from "firebase/firestore";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 
 // Import lightbox2 CSS and JS
@@ -369,54 +369,54 @@ const isReplyLiked = (reply) => {
 
 const loadTweets = async () => {
   const user = auth.currentUser;
-  if (user) {
-    const userDoc = doc(db, "followers", user.uid);
-    const userSnap = await getDoc(userDoc);
-    if (userSnap.exists() && userSnap.data().following) {
-      const followingIds = userSnap.data().following;
-      if (followingIds.length > 0) {
-        const followingTweetsQuery = query(
-          collection(db, "tweets"),
-          where("uid", "in", followingIds),
-          orderBy("timestamp", "desc")
-        );
+  if (!user) return;
 
-        const userTweetsQuery = query(
-          collection(db, "tweets"),
-          where("uid", "==", user.uid),
-          orderBy("timestamp", "desc")
-        );
+  // Ensure following users are loaded
+  await loadFollowingUsers();
 
-        const followingTweetsSnapshot = await getDocs(followingTweetsQuery);
-        const userTweetsSnapshot = await getDocs(userTweetsQuery);
+  // Create a Firestore query to fetch tweets
+  let q;
 
-        // Concatenate the arrays of documents
-        const allTweetsSnapshot = [...followingTweetsSnapshot.docs, ...userTweetsSnapshot.docs];
-
-        // Sort the concatenated array by timestamp
-        allTweetsSnapshot.sort((a, b) => b.data().timestamp - a.data().timestamp);
-
-        tweets.value = allTweetsSnapshot;
-      } else {
-        // If the user is not following anyone, load only their own tweets
-        const userTweetsQuery = query(
-          collection(db, "tweets"),
-          where("uid", "==", user.uid),
-          orderBy("timestamp", "desc")
-        );
-
-        const userTweetsSnapshot = await getDocs(userTweetsQuery);
-        tweets.value = userTweetsSnapshot.docs;
-      }
-    }
+  // Check if the current user's email is "admin@x.com"
+  if (user.email === "admin@x.com") {
+    q = query(collection(db, "tweets"), orderBy("timestamp", "desc"));
+  } else {
+    // Fetch tweets from users that the current user follows and their own tweets
+    const userIdsToFetchTweetsFrom = [user.uid, ...followingUsers.value];
+    q = query(collection(db, "tweets"), where("uid", "in", userIdsToFetchTweetsFrom), orderBy("timestamp", "desc"));
   }
+
+  // Fetch all tweets based on the query
+  const querySnapshot = await getDocs(q);
+  const loadedTweets = [];
+
+  querySnapshot.forEach((doc) => {
+    loadedTweets.push({
+      id: doc.id,
+      data: () => doc.data(),
+    });
+  });
+
+  tweets.value = loadedTweets;
 };
 
-onMounted(() => {
-  loadUserProfileImage();
-  loadFollowingUsers();
-  loadTweets();
+
+
+
+
+
+const cancelReply = () => {
+  replyingTo.value = null;
+  reply.value = "";
+};
+
+onMounted(async () => {
+  await loadUserProfileImage();
+  await loadFollowingUsers(); // Load following users first
+  await loadTweets(); // Then load tweets
 });
+
+
 </script>
 
 

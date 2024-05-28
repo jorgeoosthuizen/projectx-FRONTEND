@@ -106,12 +106,13 @@ const registerAction = async () => {
 
     // Store additional user info in Firestore
     await setDoc(doc(db, "users", user.uid), {
-      firstName: firstName.value, // Changed this line
-      lastName: lastName.value, // Changed this line
+      firstName: firstName.value,
+      lastName: lastName.value,
       email: email.value,
     });
 
-    router.push("/dashboard");
+    // Redirect to the login page after successful registration
+    router.push("/login");
   } catch (error) {
     isSubmitting.value = false;
     validationErrors.value = { error: error.message };
