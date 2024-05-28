@@ -9,19 +9,16 @@
               <router-link to="/home"
                 class="nav-link px-0 align-middle text-center btn btn-lg btn-block btn-outline-light">
                 <div style="display: flex; align-items: center; gap:10px;">
-                  <img src="../assets/home-button.png" alt="Home" class="nav-icon mr-2 ">
+                  <img src="../assets/home-button.png" alt="Home" class="nav-icon mr-2">
                   <span>Home</span>
                 </div>
               </router-link>
-
-
-
             </li>
             <li class="w-100 mb-3">
               <router-link to="/dashboard"
                 class="nav-link px-0 align-middle text-center btn btn-lg btn-block btn-outline-light">
                 <div style="display: flex; align-items: center; gap:10px;">
-                  <img src="../assets/dashboard.png" alt="Home" class="nav-icon mr-2 ">
+                  <img src="../assets/dashboard.png" alt="Dashboard" class="nav-icon mr-2">
                   <span>Dashboard</span>
                 </div>
               </router-link>
@@ -30,12 +27,20 @@
               <router-link to="/profile"
                 class="nav-link px-0 align-middle text-center btn btn-lg btn-block btn-outline-light">
                 <div style="display: flex; align-items: center; gap:10px;">
-                  <img src="../assets/user.png" alt="Home" class="nav-icon mr-2 ">
+                  <img src="../assets/user.png" alt="Profile" class="nav-icon mr-2">
                   <span>Profile</span>
                 </div>
               </router-link>
             </li>
-
+            <li v-if="isAdmin" class="w-100 mb-3">
+              <router-link to="/admin"
+                class="nav-link px-0 align-middle text-center btn btn-lg btn-block btn-outline-light">
+                <div style="display: flex; align-items: center; gap:10px;">
+                  <img src="../assets/admin.png" alt="Admin" class="nav-icon mr-2">
+                  <span>Admin</span>
+                </div>
+              </router-link>
+            </li>
           </ul>
           <hr>
         </div>
@@ -43,9 +48,24 @@
     </div>
   </div>
 </template>
-
 <script setup>
+import { ref, onMounted } from 'vue';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+
+const isAdmin = ref(false);
+
+onMounted(() => {
+  const auth = getAuth();
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      isAdmin.value = user.email === 'admin@x.com';
+    } else {
+      isAdmin.value = false;
+    }
+  });
+});
 </script>
+
 
 <style scoped>
 .container-fluid {
