@@ -8,7 +8,6 @@
           <router-view />
         </main>
       </div>
-      <SidebarRight/>
     </div>
     <Footer />
   </div>
@@ -18,7 +17,6 @@
 import Header from './components/HeaderView.vue'
 import Sidebar from './components/SidebarView.vue'
 import Footer from './components/FooterView.vue'
-import SidebarRight from './components/SidebarRightView.vue'
 </script>
 
 <style>

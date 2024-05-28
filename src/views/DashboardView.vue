@@ -7,7 +7,7 @@
       </div>
       <div class="d-flex justify-content-between">
         <input type="file" @change="onImageChange" class="form-control me-2" style="width: 50%;" />
-        <button @click="postTweet" class="btn btn-primary">Tweet</button>
+        <button @click="postTweet" class="btn btn-primary">Post</button>
       </div>
     </div>
     <div class="tweets-list">
