@@ -45,13 +45,13 @@ onAuthStateChanged(auth, (user) => {
 });
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(process.env.BASE_URL),
   routes,
 });
 
 router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth && !isAuthenticated) {
-    next({ name: "LoginPage" }); 
+    next({ name: "/dashboard" }); 
   } else {
     next();
   }

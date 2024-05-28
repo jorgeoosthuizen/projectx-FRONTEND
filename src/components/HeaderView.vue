@@ -1,7 +1,7 @@
 <template>
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark ">
     <div class="container-fluid">
-      <a class="navbar-brand" href="#">ProjectX</a>
+      <a class="navbar-brand" href="#">CHITCHAT</a>
       <div class="navbar-nav ml-auto">
         <router-link v-if="!isAuthenticated" to="/register" class="nav-item nav-link">Register</router-link>
         <router-link v-if="!isAuthenticated" to="/login" class="nav-item nav-link">Login</router-link>
