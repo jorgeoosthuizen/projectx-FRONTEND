@@ -25,7 +25,7 @@
             </div>
             <div class="tweet-actions mt-2">
               <button @click="toggleLike(tweet.id)" class="btn btn-outline-primary btn-sm me-2">
-                Like ({{ tweet.data().likes || 0 }})
+                {{ isTweetLiked(tweet) ? 'Unlike' : 'Like' }} ({{ tweet.data().likes || 0 }})
               </button>
               <button v-if="tweet.data().uid === currentUser.uid" @click="deleteTweet(tweet.id)"
                 class="btn btn-outline-danger btn-sm">
@@ -154,7 +154,19 @@ const toggleLike = async (tweetId) => {
       likedBy: [...likedBy, user.uid]
     });
   }
+
+  // Reload tweets after the like operation is done
+  loadTweets();
 };
+
+
+
+const isTweetLiked = (tweet) => {
+  const user = auth.currentUser;
+  if (!user) return false;
+  return tweet.data().likedBy.includes(user.uid);
+};
+
 
 const deleteTweet = async (tweetId) => {
   const tweetRef = doc(db, "tweets", tweetId);
