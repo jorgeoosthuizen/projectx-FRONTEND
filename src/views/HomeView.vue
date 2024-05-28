@@ -89,15 +89,25 @@ export default {
 
     const fetchSuggestions = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, "users"));
-        suggestions.value = querySnapshot.docs.map(doc => ({
-          ...doc.data(),
-          uid: doc.id
-        }));
+        const user = auth.currentUser;
+        if (user) {
+          const userDoc = doc(db, "followers", user.uid);
+          const userSnap = await getDoc(userDoc);
+          const currentUserFollowing = userSnap.exists() ? userSnap.data().following || [] : [];
+
+          const querySnapshot = await getDocs(collection(db, "users"));
+          suggestions.value = querySnapshot.docs
+            .map(doc => ({ ...doc.data(), uid: doc.id }))
+            .filter(suggestion => suggestion.name && suggestion.uid !== user.uid && !currentUserFollowing.includes(suggestion.uid));
+        }
       } catch (err) {
-        console.error("Erro ao carregar sugestões: ", err);
+        console.error("Error fetching suggestions: ", err);
       }
     };
+
+
+
+
 
     const loadFollowingUsers = async () => {
       const user = auth.currentUser;
@@ -105,7 +115,9 @@ export default {
         const userDoc = doc(db, "followers", user.uid);
         const userSnap = await getDoc(userDoc);
         if (userSnap.exists() && userSnap.data().following) {
-          followingUsers.value = userSnap.data().following;
+          const followingIds = userSnap.data().following;
+          // Filter out the current user's ID from the following users
+          followingUsers.value = followingIds.filter(id => id !== user.uid);
         }
       }
     };
