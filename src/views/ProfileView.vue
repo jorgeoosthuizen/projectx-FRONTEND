@@ -14,7 +14,6 @@
               <img :src="user.profileImage" alt="Profile" class="profile-image rounded-circle mb-3" />
               <h4 class="mb-3">{{ user.name }}</h4>
               <p><strong>Email:</strong> {{ user.email }}</p>
-              <p><strong>Ingressou:</strong> {{ user.joinedDate }}</p>
               <p><strong>Bio:</strong> {{ user.bio }}</p>
               <p><strong>Localização:</strong> {{ user.location }}</p>
               <p><strong>Website:</strong> <a :href="user.website" target="_blank">{{ user.website }}</a></p>

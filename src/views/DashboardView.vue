@@ -13,7 +13,8 @@
     <div class="tweets-list">
       <div v-for="tweet in tweets" :key="tweet.id" class="tweet-item mb-3 p-3 bg-light rounded">
         <div class="d-flex align-items-start">
-          <img :src="tweet.data().profileImage || defaultProfileImage" alt="Profile" class="profile-image-small rounded-circle me-2" />
+          <img :src="tweet.data().profileImage || defaultProfileImage" alt="Profile"
+            class="profile-image-small rounded-circle me-2" />
           <div class="tweet-content">
             <h5>{{ tweet.data().username }}</h5>
             <p class="mb-1">{{ tweet.data().tweet }}</p>
@@ -26,12 +27,15 @@
               <button @click="toggleLike(tweet.id)" class="btn btn-outline-primary btn-sm me-2">
                 Like ({{ tweet.data().likes || 0 }})
               </button>
-              <button v-if="tweet.data().uid === currentUser.uid" @click="deleteTweet(tweet.id)" class="btn btn-outline-danger btn-sm">
+              <button v-if="tweet.data().uid === currentUser.uid" @click="deleteTweet(tweet.id)"
+                class="btn btn-outline-danger btn-sm">
                 Delete
               </button>
-              <button @click="toggleFollow(tweet.data().uid)" class="btn btn-outline-secondary btn-sm">
+              <button v-if="currentUser && tweet.data().uid !== currentUser.uid" @click="toggleFollow(tweet.data().uid)"
+                class="btn btn-outline-secondary btn-sm">
                 {{ followingUsers.includes(tweet.data().uid) ? 'Unfollow' : 'Follow' }}
               </button>
+
             </div>
             <small v-if="tweet.data().timestamp" class="text-muted">
               {{ new Date(tweet.data().timestamp.seconds * 1000).toLocaleString() }}
@@ -47,7 +51,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { db, auth } from "../firebase/firebase";
-import { collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc, getDoc, setDoc } from "firebase/firestore";
+import { collection, getDocs, addDoc, serverTimestamp, query, orderBy, doc, updateDoc, deleteDoc, getDoc, setDoc, where } from "firebase/firestore";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 
 // Import lightbox2 CSS and JS
@@ -61,13 +65,13 @@ const defaultProfileImage = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd
 const tweetImage = ref(null);
 const tweets = ref([]);
 const followingUsers = ref([]);
-const currentUser = ref(null); 
+const currentUser = ref(null);
 const storage = getStorage();
 
 const loadUserProfileImage = async () => {
   const user = auth.currentUser;
   if (user) {
-    currentUser.value = user; 
+    currentUser.value = user;
     const userDoc = doc(db, "users", user.uid);
     const userSnap = await getDoc(userDoc);
     if (userSnap.exists()) {
@@ -202,12 +206,52 @@ const toggleFollow = async (uid) => {
   }
 };
 
-const loadTweets = () => {
-  const tweetsQuery = query(collection(db, "tweets"), orderBy("timestamp", "desc"));
-  onSnapshot(tweetsQuery, (querySnapshot) => {
-    tweets.value = querySnapshot.docs;
-  });
+const loadTweets = async () => {
+  const user = auth.currentUser;
+  if (user) {
+    const userDoc = doc(db, "followers", user.uid);
+    const userSnap = await getDoc(userDoc);
+    if (userSnap.exists() && userSnap.data().following) {
+      const followingIds = userSnap.data().following;
+      if (followingIds.length > 0) {
+        const followingTweetsQuery = query(
+          collection(db, "tweets"),
+          where("uid", "in", followingIds),
+          orderBy("timestamp", "desc")
+        );
+
+        const userTweetsQuery = query(
+          collection(db, "tweets"),
+          where("uid", "==", user.uid),
+          orderBy("timestamp", "desc")
+        );
+
+        const followingTweetsSnapshot = await getDocs(followingTweetsQuery);
+        const userTweetsSnapshot = await getDocs(userTweetsQuery);
+
+        // Concatenate the arrays of documents
+        const allTweetsSnapshot = [...followingTweetsSnapshot.docs, ...userTweetsSnapshot.docs];
+
+        // Sort the concatenated array by timestamp
+        allTweetsSnapshot.sort((a, b) => b.data().timestamp - a.data().timestamp);
+
+        tweets.value = allTweetsSnapshot;
+      } else {
+        // If the user is not following anyone, load only their own tweets
+        const userTweetsQuery = query(
+          collection(db, "tweets"),
+          where("uid", "==", user.uid),
+          orderBy("timestamp", "desc")
+        );
+
+        const userTweetsSnapshot = await getDocs(userTweetsQuery);
+        tweets.value = userTweetsSnapshot.docs;
+      }
+    }
+  }
 };
+
+
 
 onMounted(() => {
   loadUserProfileImage();

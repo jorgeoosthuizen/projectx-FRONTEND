@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { auth } from "../firebase/firebase.js";
 import { onAuthStateChanged } from "firebase/auth";
+import { ref } from "vue";
 
 import LoginPage from "../views/LoginView.vue";
 import RegisterPage from "../views/RegisterView.vue";
@@ -35,23 +36,33 @@ const routes = [
     name: "Profile",
     component: Profile,
     meta: { requiresAuth: true }
+  },
+  {
+    path: "/:pathMatch(.*)*",
+    redirect: "/home"
   }
 ];
 
-let isAuthenticated = false;
+const isAuthenticated = ref(false);
 
-onAuthStateChanged(auth, (user) => {
-  isAuthenticated = !!user;
+// Create a promise to handle the initial authentication state check
+let authReady = new Promise((resolve) => {
+  onAuthStateChanged(auth, (user) => {
+    isAuthenticated.value = !!user;
+    resolve();
+  });
 });
 
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
+  history: createWebHistory(),
   routes,
 });
 
-router.beforeEach((to, from, next) => {
-  if (to.meta.requiresAuth && !isAuthenticated) {
-    next({ name: "/dashboard" }); 
+router.beforeEach(async (to, from, next) => {
+  // Wait for the auth state to be determined before proceeding
+  await authReady;
+  if (to.meta.requiresAuth && !isAuthenticated.value) {
+    next({ name: "LoginPage" });
   } else {
     next();
   }
