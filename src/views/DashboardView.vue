@@ -35,12 +35,44 @@
                 class="btn btn-outline-secondary btn-sm">
                 {{ followingUsers.includes(tweet.data().uid) ? 'Unfollow' : 'Follow' }}
               </button>
-
+              <button @click="toggleReply(tweet.id)" class="btn btn-outline-info btn-sm">
+                Reply
+              </button>
             </div>
             <small v-if="tweet.data().timestamp" class="text-muted">
               {{ new Date(tweet.data().timestamp.seconds * 1000).toLocaleString() }}
             </small>
             <small v-else class="text-muted">Timestamp não disponível</small>
+
+            <div v-if="replyingTo === tweet.id" class="reply-form mt-3">
+              <textarea v-model="reply" class="form-control mb-2" rows="2" placeholder="Write your reply..."></textarea>
+              <button @click="postReply(tweet.id)" class="btn btn-success btn-sm me-2">Reply</button>
+              <button @click="cancelReply" class="btn btn-secondary btn-sm">Cancel</button>
+            </div>
+            <div v-if="tweet.data().replies" class="replies mt-3">
+              <div v-for="reply in tweet.data().replies" :key="reply.id" class="reply-item mb-2 p-2 bg-white rounded">
+                <div class="d-flex align-items-start">
+                  <img :src="reply.profileImage || defaultProfileImage" alt="Profile"
+                    class="profile-image-small rounded-circle me-2" />
+                  <div class="reply-content">
+                    <h6>{{ reply.username }}</h6>
+                    <p class="mb-1">{{ reply.text }}</p>
+                    <div class="reply-actions mt-2">
+                      <button @click="toggleLikeReply(tweet.id, reply.id)" class="btn btn-outline-primary btn-sm me-2">
+                        {{ isReplyLiked(reply) ? 'Unlike' : 'Like' }} ({{ reply.likes || 0 }})
+                      </button>
+                      <button v-if="reply.uid === currentUser.uid" @click="deleteReply(tweet.id, reply.id)"
+                        class="btn btn-outline-danger btn-sm">Delete</button>
+                    </div>
+                    <small v-if="reply.timestamp" class="text-muted">
+                      {{ new Date(reply.timestamp.seconds * 1000).toLocaleString() }}
+                    </small>
+                    <small v-else class="text-muted">Timestamp não disponível</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
@@ -67,6 +99,9 @@ const tweets = ref([]);
 const followingUsers = ref([]);
 const currentUser = ref(null);
 const storage = getStorage();
+
+const reply = ref("");
+const replyingTo = ref(null);
 
 const loadUserProfileImage = async () => {
   const user = auth.currentUser;
@@ -106,7 +141,8 @@ const postTweet = async () => {
       timestamp: serverTimestamp(),
       likes: 0,
       profileImage: userProfileImage.value,
-      username: userSnap.data().name || "Anônimo"
+      username: userSnap.data().name || "Anônimo",
+      replies: [] // Add replies field
     };
 
     if (tweetImage.value) {
@@ -119,11 +155,11 @@ const postTweet = async () => {
     try {
       const docRef = await addDoc(collection(db, "tweets"), tweetData);
       console.log("Tweet guardado com sucesso!");
-      
+
       // Fetch the newly added tweet document
       const newTweetSnap = await getDoc(docRef);
       const newTweetData = { id: docRef.id, data: () => newTweetSnap.data() };
-      
+
       // Update the tweets array to include the new tweet
       tweets.value.unshift(newTweetData); // Add the new tweet to the beginning of the array
     } catch (e) {
@@ -136,7 +172,6 @@ const postTweet = async () => {
   tweet.value = "";
   tweetImage.value = null;
 };
-
 
 const onImageChange = (event) => {
   tweetImage.value = event.target.files[0];
@@ -167,12 +202,10 @@ const toggleLike = async (tweetId) => {
   loadTweets();
 };
 
-
-
 const isTweetLiked = (tweet) => {
   const user = auth.currentUser;
   if (!user) return false;
-  
+
   // Check if the likedBy field exists and is an array
   if (tweet.data().likedBy && Array.isArray(tweet.data().likedBy)) {
     return tweet.data().likedBy.includes(user.uid);
@@ -181,7 +214,6 @@ const isTweetLiked = (tweet) => {
   }
 };
 
-
 const deleteTweet = async (tweetId) => {
   const tweetRef = doc(db, "tweets", tweetId);
   await deleteDoc(tweetRef);
@@ -189,7 +221,6 @@ const deleteTweet = async (tweetId) => {
   // Remove the deleted tweet from the tweets array
   tweets.value = tweets.value.filter(tweet => tweet.id !== tweetId);
 };
-
 
 const toggleFollow = async (uid) => {
   const user = auth.currentUser;
@@ -233,6 +264,106 @@ const toggleFollow = async (uid) => {
         await updateDoc(targetUserDoc, { followers: updatedFollowers });
       }
     }
+  }
+};
+
+const toggleReply = (tweetId) => {
+  replyingTo.value = replyingTo.value === tweetId ? null : tweetId;
+};
+
+const postReply = async (tweetId) => {
+  const user = auth.currentUser;
+  if (!user || reply.value.trim() === "") return;
+
+  const tweetRef = doc(db, "tweets", tweetId);
+  const tweetSnapshot = await getDoc(tweetRef);
+  const currentReplies = tweetSnapshot.data().replies || [];
+
+  const userDoc = doc(db, "users", user.uid);
+  const userSnap = await getDoc(userDoc);
+
+  const newReply = {
+    id: new Date().getTime().toString(), // Unique ID for the reply
+    uid: user.uid,
+    text: reply.value,
+    timestamp: new Date().getTime(), // Use a timestamp here
+    likes: 0,
+    profileImage: userProfileImage.value,
+    username: userSnap.data().name || "Anônimo",
+  };
+
+  await updateDoc(tweetRef, {
+    replies: [...currentReplies, newReply]
+  });
+
+  // Reload tweets after the reply operation is done
+  loadTweets();
+  reply.value = "";
+  replyingTo.value = null;
+};
+
+const deleteReply = async (tweetId, replyId) => {
+  const tweetRef = doc(db, "tweets", tweetId);
+  const tweetSnapshot = await getDoc(tweetRef);
+  const currentReplies = tweetSnapshot.data().replies || [];
+
+  const updatedReplies = currentReplies.filter(reply => reply.id !== replyId);
+
+  await updateDoc(tweetRef, {
+    replies: updatedReplies
+  });
+
+  // Reload tweets after the delete operation is done
+  loadTweets();
+};
+
+const toggleLikeReply = async (tweetId, replyId) => {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  const tweetRef = doc(db, "tweets", tweetId);
+  const tweetSnapshot = await getDoc(tweetRef);
+  const currentReplies = tweetSnapshot.data().replies || [];
+
+  const updatedReplies = currentReplies.map(reply => {
+    if (reply.id === replyId) {
+      const currentLikes = reply.likes || 0;
+      const likedBy = reply.likedBy || [];
+
+      if (likedBy.includes(user.uid)) {
+        return {
+          ...reply,
+          likes: currentLikes - 1,
+          likedBy: likedBy.filter(uid => uid !== user.uid)
+        };
+      } else {
+        return {
+          ...reply,
+          likes: currentLikes + 1,
+          likedBy: [...likedBy, user.uid]
+        };
+      }
+    }
+    return reply;
+  });
+
+  await updateDoc(tweetRef, {
+    replies: updatedReplies
+  });
+
+  // Reload tweets after the like operation is done
+  loadTweets();
+};
+
+const isReplyLiked = (reply) => {
+  const user = auth.currentUser;
+  if (!user) return false;
+
+  // Check if the likedBy field exists and is an array
+  if (reply.likedBy && Array.isArray(reply.likedBy)) {
+    return reply.likedBy.includes(user.uid);
+  } else {
+    return false; // Return false if the likedBy field is not found or not an array
   }
 };
 
@@ -281,14 +412,14 @@ const loadTweets = async () => {
   }
 };
 
-
-
 onMounted(() => {
   loadUserProfileImage();
   loadFollowingUsers();
   loadTweets();
 });
 </script>
+
+
 
 <style scoped>
 .profile-image {
@@ -345,5 +476,19 @@ onMounted(() => {
 
 .tweet-actions button {
   margin-right: 10px;
+}
+
+.reply-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.replies {
+  margin-top: 10px;
+}
+
+.reply-item {
+  padding: 10px;
+  border: 1px solid #ccc;
 }
 </style>
