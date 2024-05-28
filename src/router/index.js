@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { auth } from "../firebase/firebase.js";
-import { onAuthStateChanged } from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { ref } from "vue";
+import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
 
 import LoginPage from "../views/LoginView.vue";
 import RegisterPage from "../views/RegisterView.vue";
@@ -40,9 +40,9 @@ const routes = [
   },
   {
     path: "/admin",
-    name: "Admin Panel",
+    name: "AdminPanel",
     component: AdminPanel,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, requiresAdmin: true }
   },
   {
     path: "/:pathMatch(.*)*",
@@ -50,26 +50,62 @@ const routes = [
   }
 ];
 
-const isAuthenticated = ref(false);
+const router = createRouter({
+  history: createWebHistory(),
+  routes
+});
 
-// Create a promise to handle the initial authentication state check
-let authReady = new Promise((resolve) => {
-  onAuthStateChanged(auth, (user) => {
-    isAuthenticated.value = !!user;
+const auth = getAuth();
+const db = getFirestore();
+let isAuthenticated = ref(false);
+let userEmail = ref(null);
+let isAdmin = ref(false);
+
+const authReady = new Promise((resolve) => {
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      isAuthenticated.value = true;
+      userEmail.value = user.email;
+
+      // Buscar dados adicionais do Firestore
+      const userDoc = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userDoc);
+
+      if (userSnap.exists()) {
+        const userData = userSnap.data();
+        isAdmin.value = userData.email === 'admin@x.com'; // Verificação de administrador
+
+        if (isAdmin.value) {
+          // Redirecionar para /admin se o usuário for admin
+          router.push({ name: 'AdminPanel' });
+        }
+      } else {
+        // Documento não existe, então vamos criar um documento padrão
+        await setDoc(userDoc, { email: user.email, name: "User" });
+        console.log("No such document, creating default user document.");
+        isAdmin.value = user.email === 'admin@x.com'; // Verificação de administrador
+
+        if (isAdmin.value) {
+          // Redirecionar para /admin se o usuário for admin
+          router.push({ name: 'AdminPanel' });
+        }
+      }
+    } else {
+      isAuthenticated.value = false;
+      userEmail.value = null;
+      isAdmin.value = false;
+    }
     resolve();
   });
 });
 
-const router = createRouter({
-  history: createWebHistory(),
-  routes,
-});
-
 router.beforeEach(async (to, from, next) => {
-  // Wait for the auth state to be determined before proceeding
   await authReady;
+
   if (to.meta.requiresAuth && !isAuthenticated.value) {
-    next({ name: "LoginPage" });
+    next({ name: 'LoginPage' });
+  } else if (to.meta.requiresAdmin && !isAdmin.value) {
+    next({ name: 'Home' });  // Redirecionar para home ou outra página se não for admin
   } else {
     next();
   }
