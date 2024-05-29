@@ -2,18 +2,17 @@ Projeto 2 - CHITCHAT (Twitter clone)
 
 ## Frameworks
 ```
-vue
-bootstrap
+Vue
+Bootstrap
 ```
 
 ### Libraries
 ```
-axios
-core-js
-jquery
-lightbox2
-pinia
-vue-router
+Axios
+Jquery
+Lightbox2
+Pinia
+Vue-router
 ```
 
 ### Services/Platforms
