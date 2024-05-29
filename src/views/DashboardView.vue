@@ -16,7 +16,7 @@
           <img :src="tweet.data().profileImage || defaultProfileImage" alt="Profile"
             class="profile-image-small rounded-circle me-2" />
           <div class="tweet-content">
-            <h5>{{ tweet.data().username }}</h5>
+            <h5>{{ tweet.data().username }}</h5> 
             <p class="mb-1">{{ tweet.data().tweet }}</p>
             <div v-if="tweet.data().imageUrl">
               <a :href="tweet.data().imageUrl" data-lightbox="tweet-images" data-title="Tweet Image">
@@ -141,8 +141,10 @@ const postTweet = async () => {
       timestamp: serverTimestamp(),
       likes: 0,
       profileImage: userProfileImage.value,
-      username: userSnap.data().name || "Anônimo",
-      replies: [] // Add replies field
+      username: userSnap.data().firstName && userSnap.data().lastName
+        ? `${userSnap.data().firstName} ${userSnap.data().lastName}`
+        : "Anônimo",
+      replies: [] 
     };
 
     if (tweetImage.value) {
@@ -289,7 +291,9 @@ const postReply = async (tweetId) => {
     timestamp: new Date().getTime(), // Use a timestamp here
     likes: 0,
     profileImage: userProfileImage.value,
-    username: userSnap.data().name || "Anônimo",
+    username: userSnap.data().firstName && userSnap.data().lastName
+        ? `${userSnap.data().firstName} ${userSnap.data().lastName}`
+        : "Anônimo",
   };
 
   await updateDoc(tweetRef, {

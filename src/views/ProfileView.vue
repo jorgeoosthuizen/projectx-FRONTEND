@@ -12,7 +12,7 @@
             </div>
             <div v-else class="profile-info text-center">
               <img :src="user.profileImage" alt="Profile" class="profile-image rounded-circle mb-3" />
-              <h4 class="mb-3">{{ user.name }}</h4>
+              <h4 class="mb-3">{{ user.firstName }} {{ user.lastName }}</h4>
               <p><strong>Email:</strong> {{ user.email }}</p>
               <p><strong>Bio:</strong> {{ user.bio }}</p>
               <p><strong>Localização:</strong> {{ user.location }}</p>
@@ -24,8 +24,12 @@
               <h3 class="text-center">Editar Perfil</h3>
               <form @submit.prevent="editProfile">
                 <div class="mb-3">
-                  <label for="name" class="form-label">Nome:</label>
-                  <input id="name" v-model="user.name" type="text" class="form-control" />
+                  <label for="firstName" class="form-label">Nome:</label>
+                  <input id="firstName" v-model="user.firstName" type="text" class="form-control" required />
+                </div>
+                <div class="mb-3">
+                  <label for="lastName" class="form-label">Apelido:</label>
+                  <input id="lastName" v-model="user.lastName" type="text" class="form-control" required />
                 </div>
                 <div class="mb-3">
                   <label for="bio" class="form-label">Bio:</label>
@@ -67,7 +71,8 @@ import { db, auth } from "../firebase/firebase";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const user = ref({
-  name: "",
+  firstName: "",
+  lastName: "",
   email: "",
   joinedDate: "",
   bio: "",
@@ -79,7 +84,7 @@ const user = ref({
 const loading = ref(true);
 const editing = ref(false);
 const selectedImage = ref(null);
-const today = new Date().toISOString().split("T")[0];  // Today's date in YYYY-MM-DD format
+const today = new Date().toISOString().split("T")[0]; 
 
 const getUserData = async () => {
   const userDoc = doc(db, "users", auth.currentUser.uid);
@@ -101,7 +106,8 @@ const editProfile = async () => {
 
   const userDoc = doc(db, "users", auth.currentUser.uid);
   const updatedData = {
-    name: user.value.name,
+    firstName: user.value.firstName,
+    lastName: user.value.lastName,
     bio: user.value.bio || "",
     location: user.value.location || "",
     website: user.value.website || "",
@@ -126,7 +132,7 @@ const onImageChange = (event) => {
 };
 
 const validateProfile = () => {
-  if (!user.value.name) {
+  if (!user.value.firstName) {
     alert("Nome é obrigatório.");
     return false;
   }
