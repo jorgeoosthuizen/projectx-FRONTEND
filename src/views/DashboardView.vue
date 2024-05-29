@@ -65,13 +65,14 @@
                         class="btn btn-outline-danger btn-sm">Delete</button>
                     </div>
                     <small v-if="reply.timestamp" class="text-muted">
-                      {{ new Date(reply.timestamp.seconds * 1000).toLocaleString() }}
+                      {{ new Date(reply.timestamp).toLocaleString() }}
                     </small>
                     <small v-else class="text-muted">Timestamp não disponível</small>
                   </div>
                 </div>
               </div>
             </div>
+
           </div>
         </div>
       </div>
@@ -79,10 +80,12 @@
   </div>
 </template>
 
+
 <script setup>
+
 import { ref, onMounted } from "vue";
 import { db, auth } from "../firebase/firebase";
-import { collection, getDocs, addDoc, serverTimestamp, query, orderBy, doc, updateDoc, deleteDoc, getDoc, setDoc, where} from "firebase/firestore";
+import { collection, getDocs, addDoc, serverTimestamp, query, orderBy, doc, updateDoc, deleteDoc, getDoc, setDoc, where } from "firebase/firestore";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 
 // Import lightbox2 CSS and JS
@@ -287,7 +290,7 @@ const postReply = async (tweetId) => {
     id: new Date().getTime().toString(), // Unique ID for the reply
     uid: user.uid,
     text: reply.value,
-    timestamp: new Date().getTime(), // Use a timestamp here
+    timestamp: new Date().toISOString(), // Save date as an ISO string
     likes: 0,
     profileImage: userProfileImage.value,
     username: userSnap.data().firstName && userSnap.data().lastName
@@ -299,7 +302,6 @@ const postReply = async (tweetId) => {
     replies: [...currentReplies, newReply]
   });
 
-  // Reload tweets after the reply operation is done
   loadTweets();
   reply.value = "";
   replyingTo.value = null;
@@ -316,7 +318,6 @@ const deleteReply = async (tweetId, replyId) => {
     replies: updatedReplies
   });
 
-  // Reload tweets after the delete operation is done
   loadTweets();
 };
 
@@ -354,7 +355,6 @@ const toggleLikeReply = async (tweetId, replyId) => {
     replies: updatedReplies
   });
 
-  // Reload tweets after the like operation is done
   loadTweets();
 };
 
@@ -362,63 +362,60 @@ const isReplyLiked = (reply) => {
   const user = auth.currentUser;
   if (!user) return false;
 
-  // Check if the likedBy field exists and is an array
   if (reply.likedBy && Array.isArray(reply.likedBy)) {
     return reply.likedBy.includes(user.uid);
   } else {
-    return false; // Return false if the likedBy field is not found or not an array
+    return false;
   }
 };
 
 const loadTweets = async () => {
   const user = auth.currentUser;
-  if (!user) return;
+  if (user) {
+    const userDoc = doc(db, "followers", user.uid);
+    const userSnap = await getDoc(userDoc);
+    if (userSnap.exists() && userSnap.data().following) {
+      const followingIds = userSnap.data().following;
+      if (followingIds.length > 0) {
+        const followingTweetsQuery = query(
+          collection(db, "tweets"),
+          where("uid", "in", followingIds),
+          orderBy("timestamp", "desc")
+        );
 
-  // Ensure following users are loaded
-  await loadFollowingUsers();
+        const userTweetsQuery = query(
+          collection(db, "tweets"),
+          where("uid", "==", user.uid),
+          orderBy("timestamp", "desc")
+        );
 
-  // Create a Firestore query to fetch tweets
-  let q;
+        const followingTweetsSnapshot = await getDocs(followingTweetsQuery);
+        const userTweetsSnapshot = await getDocs(userTweetsQuery);
 
-  // Check if the current user's email is "admin@x.com"
-  if (user.email === "admin@x.com") {
-    q = query(collection(db, "tweets"), orderBy("timestamp", "desc"));
-  } else {
-    // Fetch tweets from users that the current user follows and their own tweets
-    const userIdsToFetchTweetsFrom = [user.uid, ...followingUsers.value];
-    q = query(collection(db, "tweets"), where("uid", "in", userIdsToFetchTweetsFrom), orderBy("timestamp", "desc"));
+        const allTweetsSnapshot = [...followingTweetsSnapshot.docs, ...userTweetsSnapshot.docs];
+
+        allTweetsSnapshot.sort((a, b) => b.data().timestamp - a.data().timestamp);
+
+        tweets.value = allTweetsSnapshot;
+      } else {
+        const userTweetsQuery = query(
+          collection(db, "tweets"),
+          where("uid", "==", user.uid),
+          orderBy("timestamp", "desc")
+        );
+
+        const userTweetsSnapshot = await getDocs(userTweetsQuery);
+        tweets.value = userTweetsSnapshot.docs;
+      }
+    }
   }
-
-  // Fetch all tweets based on the query
-  const querySnapshot = await getDocs(q);
-  const loadedTweets = [];
-
-  querySnapshot.forEach((doc) => {
-    loadedTweets.push({
-      id: doc.id,
-      data: () => doc.data(),
-    });
-  });
-
-  tweets.value = loadedTweets;
 };
 
-
-
-
-
-
-const cancelReply = () => {
-  replyingTo.value = null;
-  reply.value = "";
-};
-
-onMounted(async () => {
-  await loadUserProfileImage();
-  await loadFollowingUsers(); // Load following users first
-  await loadTweets(); // Then load tweets
+onMounted(() => {
+  loadUserProfileImage();
+  loadFollowingUsers();
+  loadTweets();
 });
-
 
 </script>
 
