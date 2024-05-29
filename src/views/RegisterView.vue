@@ -149,6 +149,7 @@ const registerAction = async () => {
     const user = userCredential.user;
 
     await setDoc(doc(db, "users", user.uid), {
+
       firstName: firstName.value, 
       lastName: lastName.value, 
       email: email.value,
