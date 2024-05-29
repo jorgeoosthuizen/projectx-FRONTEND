@@ -23,11 +23,6 @@ Firebase Authentication
 Firebase Storage
 ```
 
-### 
-```
-
-```
-
 ### Resumo da App
 - App criada utilizando Vue-CLI
 - Componentes Navbar e Sidebar com varios botões e redirecionamento utilizando Vue Router.
