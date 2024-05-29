@@ -12,8 +12,7 @@
                 class="form-control"
                 id="firstName"
                 name="firstName"
-                v-model="firstName"
-              />
+                v-model="firstName"/>
             </div>
             <div class="mb-3">
               <label for="lastName" class="form-label">Last Name</label>
