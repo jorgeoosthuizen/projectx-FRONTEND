@@ -43,6 +43,7 @@
                 name="password"
                 v-model="password"
               />
+              
             </div>
             <div class="mb-3">
               <label for="confirmPassword" class="form-label">Confirm Password</label>
