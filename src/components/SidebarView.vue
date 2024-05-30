@@ -91,7 +91,6 @@ nav li {
   display: block;
   padding: 10px;
   font-size: 1.2rem;
-  /* Increase font size */
   transition: background-color 0.3s, transform 0.3s;
 }
 
@@ -115,7 +114,6 @@ nav li {
   .nav-link {
     padding: 8px;
     font-size: 1rem;
-    /* Adjust font size for smaller screens */
   }
 }
 </style>

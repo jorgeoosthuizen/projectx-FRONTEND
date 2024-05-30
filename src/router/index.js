@@ -69,26 +69,22 @@ const authReady = new Promise((resolve) => {
       isAuthenticated.value = true;
       userEmail.value = user.email;
 
-      // Buscar dados adicionais do Firestore
       const userDoc = doc(db, "users", user.uid);
       const userSnap = await getDoc(userDoc);
 
       if (userSnap.exists()) {
         const userData = userSnap.data();
-        isAdmin.value = userData.email === 'admin@x.com'; // Verificação de administrador
+        isAdmin.value = userData.email === 'admin@x.com'; 
 
         if (isAdmin.value) {
-          // Redirecionar para /admin se o usuário for admin
           router.push({ name: 'AdminPanel' });
         }
       } else {
-        // Documento não existe, então vamos criar um documento padrão
         await setDoc(userDoc, { email: user.email, name: "User" });
         console.log("No such document, creating default user document.");
-        isAdmin.value = user.email === 'admin@x.com'; // Verificação de administrador
+        isAdmin.value = user.email === 'admin@x.com'; 
 
         if (isAdmin.value) {
-          // Redirecionar para /admin se o usuário for admin
           router.push({ name: 'AdminPanel' });
         }
       }
@@ -107,7 +103,7 @@ router.beforeEach(async (to, from, next) => {
   if (to.meta.requiresAuth && !isAuthenticated.value) {
     next({ name: 'LoginPage' });
   } else if (to.meta.requiresAdmin && !isAdmin.value) {
-    next({ name: 'Home' });  // Redirecionar para home ou outra página se não for admin
+    next({ name: 'Home' });  
   } else {
     next();
   }

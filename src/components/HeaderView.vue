@@ -76,11 +76,9 @@ const logout = async () => {
   font-size: 20px;
   font-weight: bolder;
   background-color: var(--primary-color);
-  /* Set background color */
+
   border: none;
-  /* Remove border */
   margin: 0 10px;
-  /* Adjust margin */
 }
 
 .login {
@@ -100,13 +98,11 @@ const logout = async () => {
 
 .register {
   margin-right: 10px;
-  /* Add margin to the right of the register button */
 }
 
 .register:hover,
 .login:hover,
 .logout:hover {
   color: black;
-  /* Change text color to black when hovering */
 }
 </style>

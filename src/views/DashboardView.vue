@@ -160,12 +160,10 @@ const postTweet = async () => {
       const docRef = await addDoc(collection(db, "tweets"), tweetData);
       console.log("Tweet guardado com sucesso!");
 
-      // Fetch the newly added tweet document
       const newTweetSnap = await getDoc(docRef);
       const newTweetData = { id: docRef.id, data: () => newTweetSnap.data() };
 
-      // Update the tweets array to include the new tweet
-      tweets.value.unshift(newTweetData); // Add the new tweet to the beginning of the array
+      tweets.value.unshift(newTweetData); 
     } catch (e) {
       console.error("Erro ao guardar tweet: ", e);
     }
@@ -202,7 +200,6 @@ const toggleLike = async (tweetId) => {
     });
   }
 
-  // Reload tweets after the like operation is done
   loadTweets();
 };
 
@@ -210,11 +207,10 @@ const isTweetLiked = (tweet) => {
   const user = auth.currentUser;
   if (!user) return false;
 
-  // Check if the likedBy field exists and is an array
   if (tweet.data().likedBy && Array.isArray(tweet.data().likedBy)) {
     return tweet.data().likedBy.includes(user.uid);
   } else {
-    return false; // Return false if the likedBy field is not found or not an array
+    return false; 
   }
 };
 
@@ -222,7 +218,6 @@ const deleteTweet = async (tweetId) => {
   const tweetRef = doc(db, "tweets", tweetId);
   await deleteDoc(tweetRef);
 
-  // Remove the deleted tweet from the tweets array
   tweets.value = tweets.value.filter(tweet => tweet.id !== tweetId);
 };
 
@@ -287,10 +282,10 @@ const postReply = async (tweetId) => {
   const userSnap = await getDoc(userDoc);
 
   const newReply = {
-    id: new Date().getTime().toString(), // Unique ID for the reply
+    id: new Date().getTime().toString(), 
     uid: user.uid,
     text: reply.value,
-    timestamp: new Date().toISOString(), // Save date as an ISO string
+    timestamp: new Date().toISOString(), 
     likes: 0,
     profileImage: userProfileImage.value,
     username: userSnap.data().firstName && userSnap.data().lastName

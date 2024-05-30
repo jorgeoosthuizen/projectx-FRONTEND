@@ -69,7 +69,6 @@ export default {
       const userRef = doc(db, "followers", uid);
       const userSnap = await getDoc(userRef);
       if (!userSnap.exists()) {
-        // Create a new document if it doesn't exist
         await setDoc(userRef, { followers: [], following: [] });
       }
     };
@@ -116,7 +115,6 @@ export default {
         const userSnap = await getDoc(userDoc);
         if (userSnap.exists() && userSnap.data().following) {
           const followingIds = userSnap.data().following;
-          // Filter out the current user's ID from the following users
           followingUsers.value = followingIds.filter(id => id !== user.uid);
         }
       }
@@ -131,10 +129,8 @@ export default {
         const targetUserDoc = doc(db, "followers", uid);
         let targetUserSnap = await getDoc(targetUserDoc);
 
-        // If target user document doesn't exist, create it
         if (!targetUserSnap.exists()) {
           await setDoc(targetUserDoc, { followers: [], following: [] });
-          // Re-fetch the target user snapshot after creating the document
           targetUserSnap = await getDoc(targetUserDoc);
         }
         console.log("Target user document:", targetUserSnap.data());
@@ -178,7 +174,7 @@ export default {
 
       const user = auth.currentUser;
       if (user) {
-        setFollowersDocument(user.uid); // Ensure the document exists for the current user
+        setFollowersDocument(user.uid); 
       }
     });
 
