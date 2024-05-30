@@ -74,7 +74,7 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { auth, db } from "../firebase/firebase"; // Certifique-se de ajustar o caminho conforme necessário
+import { auth, db } from "../firebase/firebase"; 
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { setDoc, doc, collection, query, where, getDocs } from "firebase/firestore";
 
@@ -120,7 +120,6 @@ const registerAction = async () => {
     return;
   }
 
-  // Verificar se o email já está registrado
   try {
     const usersCollection = collection(db, "users");
     const q = query(usersCollection, where("email", "==", email.value));
@@ -138,7 +137,7 @@ const registerAction = async () => {
   }
 
   isSubmitting.value = true;
-  validationErrors.value = {}; // Clear previous errors
+  validationErrors.value = {}; 
 
   try {
     const userCredential = await createUserWithEmailAndPassword(

@@ -38,16 +38,16 @@ import Footer from './components/FooterView.vue'
   flex-direction: column;
   flex: 1;
   padding: 20px;
-  width: 100%; /* Add this */
-  height: 100%; /* Add this */
+  width: 100%; 
+  height: 100%;
 }
 
 .content {
   flex: 1;
   padding: 20px;
   overflow-y: auto;
-  width: 100%; /* Add this */
-  height: 100%; /* Add this */
+  width: 100%; 
+  height: 100%; 
 }
 header,
 footer {
